@@ -172,4 +172,3 @@ python backend/app/scripts/backup_db.py --output-dir backups --retention-days 14
 - All spreadsheet and CSV exports neutralize formula injection attempts (cells beginning with `=`, `+`, `-`, `@`, `\t`, `\r` are escaped with a leading single quote `'`).
 - Transcripts larger than 12MB or containing ZIP compression expansion ratios greater than 50:1 are rejected immediately.
 - The health check endpoint `GET /api/v1/health` verifies database connectivity via `SELECT 1` without ever leaking connection strings, passwords, or internal file paths.
-
