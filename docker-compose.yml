@@ -1,0 +1,93 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cmtat_mysql
+    restart: unless-stopped
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max_connections=200
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_super_secret_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-meeting_tracker_db}
+      MYSQL_USER: ${MYSQL_USER:-tracker_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-tracker_secret}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "tracker_user", "--password=tracker_secret"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - cmtat_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cmtat_backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql+pymysql://tracker_user:tracker_secret@mysql:3306/meeting_tracker_db
+      APP_ENV: production
+      AUTH_ENABLED: "true"
+      APP_SHARED_PASSWORD: ${APP_SHARED_PASSWORD:-meeting-tracker-pass-2026}
+      API_SECRET_KEY: ${API_SECRET_KEY:-change-in-production-strong-secret-key-32chars}
+      ACCESS_TOKEN_EXPIRE_MINUTES: 1440
+      RATE_LIMIT_ENABLED: "true"
+      RATE_LIMIT_LOGIN: 10
+      RATE_LIMIT_MEETINGS: 120
+      RATE_LIMIT_EXTRACT: 30
+      RATE_LIMIT_EXPORT: 60
+      DATA_RETENTION_DAYS: 90
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: gemini-2.5-flash
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - cmtat_network
+
+  frontend:
+    build:
+      context: ./client-meeting-action-tracker
+      dockerfile: Dockerfile
+    container_name: cmtat_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "5173:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - cmtat_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  cmtat_network:
+    driver: bridge
+

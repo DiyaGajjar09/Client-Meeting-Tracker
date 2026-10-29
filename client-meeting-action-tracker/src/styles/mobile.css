@@ -1,0 +1,48 @@
+/* ============================================================
+   Mobile & Responsive Enhancements
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .review-split-layout {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+@media (max-width: 768px) {
+  #mobile-menu-btn {
+    display: flex !important;
+  }
+
+  .topbar {
+    left: 0 !important;
+    padding: 0 1rem !important;
+  }
+
+  .app-content {
+    margin-left: 0 !important;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width) !important;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  .sidebar-overlay {
+    display: block !important;
+  }
+
+  .page-container {
+    padding: 1.25rem 1rem !important;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+    gap: 0.75rem !important;
+  }
+}

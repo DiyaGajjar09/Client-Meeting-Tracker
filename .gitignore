@@ -1,0 +1,35 @@
+# Root .gitignore for Client Meeting-to-Action Tracker
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+*.local.env
+
+# Dependencies and caches
+node_modules/
+.venv/
+env/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# Logs and databases
+*.log
+*.sql
+!backend/init-db.sql
+mysql_data/
+*.db
+*.sqlite
+
+# IDE and OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
